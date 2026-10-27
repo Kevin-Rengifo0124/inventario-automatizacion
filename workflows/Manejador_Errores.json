@@ -1,0 +1,141 @@
+{
+  "name": "Manejador_Errores",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        96
+      ],
+      "id": "72eea6d8-444b-47fe-9f78-e9c61d7f16ec",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1yqED2czmrN-Yly6o_ojjU71qXQUzQ0ayXrxVa2SAvhA",
+          "mode": "list",
+          "cachedResultName": "Inventario",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yqED2czmrN-Yly6o_ojjU71qXQUzQ0ayXrxVa2SAvhA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1032617225,
+          "mode": "list",
+          "cachedResultName": "Errores",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yqED2czmrN-Yly6o_ojjU71qXQUzQ0ayXrxVa2SAvhA/edit#gid=1032617225"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha_hora": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+            "workflow": "={{ $json.workflow.name }}",
+            "nodo": "={{ $json.execution.lastNodeExecuted }}",
+            "mensaje": "={{ $json.execution.error.message }}",
+            "ejecucion": "={{ $json.execution.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "fecha_hora",
+              "displayName": "fecha_hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "workflow",
+              "displayName": "workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nodo",
+              "displayName": "nodo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ejecucion",
+              "displayName": "ejecucion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        256,
+        80
+      ],
+      "id": "275c1c9b-b181-45df-bec0-5c42c3e03a4b",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Q73xJZiH8WOnVr8g",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "timezone": "America/Bogota",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "b02aff70-f950-4d03-8d53-a9b4fbd96e8e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d1282655cfdd1640488cbeddc250173742ddc56ff6fa977eb73a0de265c268b9"
+  },
+  "nodeGroups": [],
+  "id": "p8c4XtQTuUyHAXc2",
+  "tags": []
+}

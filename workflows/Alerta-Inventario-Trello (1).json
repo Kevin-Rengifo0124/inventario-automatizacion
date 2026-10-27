@@ -1,0 +1,154 @@
+{
+  "name": "Alerta-Inventario-Trello",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c76c4a49-ceee-4399-b8e1-5767da7a5835",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6302bcfa-d8fd-4b7f-9131-d818597b5604",
+              "name": "producto",
+              "value": "={{ $json.producto }}",
+              "type": "string"
+            },
+            {
+              "id": "e2176fe7-e1f0-43ef-9809-9f0f0cb768dd",
+              "name": "categoria",
+              "value": "={{ $json.categoria }}",
+              "type": "string"
+            },
+            {
+              "id": "bbab9dca-9be7-4c80-9116-11445f7907af",
+              "name": "cantidad",
+              "value": "={{ $json.cantidad }}",
+              "type": "number"
+            },
+            {
+              "id": "3f0aaad6-2a5b-491e-9321-7b3e975ab98e",
+              "name": "stock_minimo",
+              "value": "={{ $json.stock_minimo }}",
+              "type": "number"
+            },
+            {
+              "id": "9bc1683c-253e-4c4f-9ab3-cda92c7d8789",
+              "name": "solicitud_id",
+              "value": "={{ $json.ticket ?? \"inventario-manual\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "6c46cf5d-f6ed-4fc5-80e9-d773cc2638b9",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.trello.com/1/cards",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "idList",
+              "value": "6abb07f2f07430226542d911"
+            },
+            {
+              "name": "pos",
+              "value": "top"
+            },
+            {
+              "name": "name",
+              "value": "={{ 'Reposición urgente: ' + $json.producto }}"
+            },
+            {
+              "name": "desc",
+              "value": "={{ \n'Título: Reposición urgente: ' + $json.producto +\n'\\nTicket: ' + $json.solicitud_id +\n'\\nCategoría: ' + $json.categoria +\n'\\nProducto: ' + $json.producto +\n'\\nStock actual: ' + $json.cantidad +\n'\\nStock mínimo: ' + $json.stock_minimo\n}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        0
+      ],
+      "id": "865c8b5d-1288-4c88-a443-115277f85b6f",
+      "name": "Crear tarjeta Trello",
+      "credentials": {
+        "trelloApi": {
+          "id": "W2mB4gjRCFHZoy1W",
+          "name": "Trello inventario"
+        },
+        "httpHeaderAuth": {
+          "id": "P9fDHlJ0TdTrr096",
+          "name": "Header Auth account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Crear tarjeta Trello",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "p8c4XtQTuUyHAXc2",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "95e5df66-e23f-4a15-bc03-2a09b319a1c2",
+  "meta": {
+    "instanceId": "d1282655cfdd1640488cbeddc250173742ddc56ff6fa977eb73a0de265c268b9"
+  },
+  "nodeGroups": [],
+  "id": "5c6jSEHxjWmcVdqZ",
+  "tags": []
+}

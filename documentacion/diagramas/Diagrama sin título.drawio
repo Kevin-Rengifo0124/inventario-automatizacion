@@ -1,0 +1,55 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Proceso Manual" id="bHTbv_lhJBDaAL6O_gsz">
+    <mxGraphModel dx="1601" dy="637" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="utYZOmqDW9TzLceHzDj_-1" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=18;fontStyle=1;fontColor=#12233B;" value="Inventario — Proceso manual (antes de n8n)" vertex="1">
+          <mxGeometry height="30" width="700" x="200" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="utYZOmqDW9TzLceHzDj_-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E48B2D;fontSize=12;" value="1 · Entra o sale un producto del almacén" vertex="1">
+          <mxGeometry height="50" width="300" x="300" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="utYZOmqDW9TzLceHzDj_-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E48B2D;fontSize=12;" value="2 · Alguien actualiza la hoja de Google Sheets a mano" vertex="1">
+          <mxGeometry height="50" width="300" x="300" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="utYZOmqDW9TzLceHzDj_-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E48B2D;fontSize=12;" value="3 · Revisión del stock cuando alguien tiene tiempo (sin horario fijo)" vertex="1">
+          <mxGeometry height="50" width="300" x="300" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="utYZOmqDW9TzLceHzDj_-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E48B2D;fontSize=12;" value="4 · Comparar cantidad vs stock mínimo a simple vista" vertex="1">
+          <mxGeometry height="50" width="300" x="300" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="utYZOmqDW9TzLceHzDj_-6" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF4CE;strokeColor=#E48B2D;fontSize=12;" value="¿Está en el mínimo o por debajo?" vertex="1">
+          <mxGeometry height="80" width="300" x="300" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="utYZOmqDW9TzLceHzDj_-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E48B2D;fontSize=12;" value="5 · Redactar el aviso a mano y enviarlo al responsable" vertex="1">
+          <mxGeometry height="50" width="300" x="300" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="utYZOmqDW9TzLceHzDj_-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#9AA5B1;fontSize=11;dashed=1;fontColor=#607086;" value="No se hace nada: se sigue revisando en la próxima vuelta" vertex="1">
+          <mxGeometry height="50" width="260" x="680" y="415" as="geometry" />
+        </mxCell>
+        <mxCell id="utYZOmqDW9TzLceHzDj_-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FBE4D5;strokeColor=#E48B2D;align=left;spacingLeft=10;fontSize=11;verticalAlign=top;spacingTop=6;" value="Demoras y errores:&#xa;• La alerta llega tarde o nunca&#xa;• El texto cambia según quien lo escriba&#xa;• Productos saltados en hojas largas&#xa;• No queda registro de avisos enviados&#xa;• No se sabe si un producto ya fue reportado" vertex="1">
+          <mxGeometry height="130" width="220" x="40" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="utYZOmqDW9TzLceHzDj_-10" edge="1" parent="1" source="utYZOmqDW9TzLceHzDj_-2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#E48B2D;endArrow=block;" target="utYZOmqDW9TzLceHzDj_-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="utYZOmqDW9TzLceHzDj_-11" edge="1" parent="1" source="utYZOmqDW9TzLceHzDj_-3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#E48B2D;endArrow=block;" target="utYZOmqDW9TzLceHzDj_-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="utYZOmqDW9TzLceHzDj_-12" edge="1" parent="1" source="utYZOmqDW9TzLceHzDj_-4" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#E48B2D;endArrow=block;" target="utYZOmqDW9TzLceHzDj_-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="utYZOmqDW9TzLceHzDj_-13" edge="1" parent="1" source="utYZOmqDW9TzLceHzDj_-5" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#E48B2D;endArrow=block;" target="utYZOmqDW9TzLceHzDj_-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="utYZOmqDW9TzLceHzDj_-14" edge="1" parent="1" source="utYZOmqDW9TzLceHzDj_-6" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#E48B2D;endArrow=block;fontSize=10;" target="utYZOmqDW9TzLceHzDj_-7" value="sí">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="utYZOmqDW9TzLceHzDj_-15" edge="1" parent="1" source="utYZOmqDW9TzLceHzDj_-6" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#9AA5B1;endArrow=block;dashed=1;fontSize=10;" target="utYZOmqDW9TzLceHzDj_-8" value="no">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
