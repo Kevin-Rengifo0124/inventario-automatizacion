@@ -1,0 +1,849 @@
+{
+  "name": "Inventario_productos_Tally_Webhook_baserow_con_subworkflows",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Registrar_nuevo_producto",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        480,
+        704
+      ],
+      "id": "2395be3f-6f37-4a52-9b0a-c8c52f4fe274",
+      "name": "Webhook Tally",
+      "webhookId": "b011b420-097b-4f40-8a9d-44e2a63f86d9",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "\nconst body = $input.item.json.body;\nif (!body || body.eventType !== 'FORM_RESPONSE' || !body.data) {\n  throw new Error('Payload no reconocido: se esperaba un evento FORM_RESPONSE de Tally');\n}\n\nconst sinAcentos = (s) => String(s ?? '').normalize('NFD').replace(/[\\u0300-\\u03f0]/g, '');\nconst clave = (s) => sinAcentos(s).trim().toLowerCase();\n\nconst campos = body.data.fields || [];\n\nconst campo = (palabraClave) => \n  campos.find((f) => clave(f.label).includes(clave(palabraClave)));\n\nconst texto = (f) => {\n  if (!f || f.value === null || f.value === undefined) return '';\n  if (Array.isArray(f.value)) {\n    return f.value\n      .map((id) => (f.options || []).find((o) => o.id === id)?.text ?? id)\n      .join(', ')\n      .trim();\n  }\n  return String(f.value).trim();\n};\n\nconst numero = (f) => {\n  if (!f || f.value === null || f.value === undefined || f.value === '') return NaN;\n  return Number(f.value);\n};\n\nconst campoProducto = campo('Nombre del producto') || campo('Producto');\nconst campoCategoria = campo('Categoria');\nconst campoCantidad = campo('Cantidad Inicial') || campo('Cantidad');\nconst campoStockMin = campo('Stock Minimo') || campo('Stock minimo');\n\nconst producto = texto(campoProducto);\n\nlet categoriaRaw = sinAcentos(texto(campoCategoria)).trim();\nlet categoria = categoriaRaw.charAt(0).toUpperCase() + categoriaRaw.slice(1).toLowerCase();\n\nif (categoria.toLowerCase().startsWith('componen')) {\n  categoria = 'Componentes';\n}\n\nconst cantidad = numero(campoCantidad);\nconst stock_minimo = numero(campoStockMin);\n\nconst errores = [];\nif (!producto) errores.push('falta el producto');\nif (!categoria) errores.push('falta la categoria');\nif (isNaN(cantidad) || !Number.isInteger(cantidad) || cantidad < 0) errores.push('cantidad invalida');\nif (isNaN(stock_minimo) || !Number.isInteger(stock_minimo) || stock_minimo < 0) errores.push('stock minimo invalido');\n\nif (errores.length) {\n  throw new Error('Respuesta ' + body.data.responseId + ' rechazada: ' + errores.join('; '));\n}\n\nreturn { json: { producto, categoria, cantidad, stock_minimo } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        736
+      ],
+      "id": "8439a055-bef0-4823-9a7f-24458154eaef",
+      "name": "Normalizar Datos de Tally"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1ZEPGNrNXp8mOJ76HgGaUH8ZkNNb4wOPJt9uVI3tOoTw",
+          "mode": "list",
+          "cachedResultName": "Inventario_Bry",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZEPGNrNXp8mOJ76HgGaUH8ZkNNb4wOPJt9uVI3tOoTw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZEPGNrNXp8mOJ76HgGaUH8ZkNNb4wOPJt9uVI3tOoTw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "producto": "={{ $json.producto }}",
+            "id": "={{ $json.producto }}",
+            "categoria": "={{ $json.categoria }}",
+            "cantidad": "={{ $json.cantidad }}",
+            "stock_minimo": "={{ $json.stock_minimo }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "producto",
+              "displayName": "producto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cantidad",
+              "displayName": "cantidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "stock_minimo",
+              "displayName": "stock_minimo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "alwaysOutputData": true,
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1008,
+        720
+      ],
+      "id": "7a241edd-172b-4003-b6df-af999930e423",
+      "name": "Guardar Producto en Inventario",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "eWVxvWjEtWjv09nc",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        320
+      ],
+      "id": "3f3b30d0-7c09-49ce-951b-a3cd8dd2fccd",
+      "name": "Schedule Trigger Diario2"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ZEPGNrNXp8mOJ76HgGaUH8ZkNNb4wOPJt9uVI3tOoTw",
+          "mode": "list",
+          "cachedResultName": "Inventario_Bry",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZEPGNrNXp8mOJ76HgGaUH8ZkNNb4wOPJt9uVI3tOoTw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZEPGNrNXp8mOJ76HgGaUH8ZkNNb4wOPJt9uVI3tOoTw/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        992,
+        256
+      ],
+      "id": "b7ba0217-1e6a-4079-85bb-406c4b533772",
+      "name": "Get row(s) in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "eWVxvWjEtWjv09nc",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3b2dd41d-5c39-48f0-a3c5-f2c28d739352",
+              "leftValue": "={{ Number($json.cantidad) }}",
+              "rightValue": "={{ Number($json.stock_minimo) }}",
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1040,
+        464
+      ],
+      "id": "16a7374f-a8d2-4cfc-9111-42fcdbf2fdeb",
+      "name": "Filtrar Stock Bajo2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.baserow.io/api/database/rows/table/1227756/?user_field_names=true",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "baserowTokenApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ Nombre: $json.producto_normalizado, Nota: $json.cuerpo }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2160,
+        368
+      ],
+      "id": "451cf8d9-0d12-4494-ad06-0ab6b2471e7a",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.baserow.io/api/database/rows/table/1227755/?user_field_names=true",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "baserowTokenApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ producto: $json.producto, categoria: $json.categoria, cantidad: $json.cantidad, stock_minimo: $json.stock_minimo }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        752,
+        496
+      ],
+      "id": "a95f04b9-b2bb-4e3a-b100-989c175d405e",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "sendTo": "=benavidesbryan403@gmail.com",
+        "subject": "={{ 'Reposición urgente: ' + $json.Nombre}}",
+        "message": "==<div style=\"font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; max-width: 500px;\">\n  <h2 style=\"color: #d9534f; margin-top: 0;\">⚠️ Alerta de Stock Bajo</h2>\n  <p>Se ha detectado un producto por debajo del stock mínimo establecido:</p>\n  <div style=\"background-color: #f9f9f9; padding: 15px; border-left: 4px solid #d9534f; margin: 15px 0;\">\n    <p style=\"margin: 0; font-weight: bold; font-size: 16px;\">{{ $json.Nombre }}</p>\n    <p style=\"margin: 5px 0 0 0; color: #555;\">{{ $json.Nota }}</p>\n  </div>\n  <p style=\"font-size: 12px; color: #888; margin-bottom: 0;\">Generado automáticamente por el flujo de inventarios.</p>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2384,
+        368
+      ],
+      "id": "fb462d93-3bc3-4182-8b2c-b510dda91e8a",
+      "name": "Send a message",
+      "webhookId": "249ffd41-adf3-4c3d-969d-d26ccfd56ee8",
+      "notes": "."
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "894c2cce-1afd-4202-88e3-1fd14c8d86dd",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        480,
+        480
+      ],
+      "id": "63040040-d753-48f9-8b05-619ba12b1da8",
+      "name": "Webhook Inventario actualizarcion",
+      "webhookId": "894c2cce-1afd-4202-88e3-1fd14c8d86dd"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        544,
+        160
+      ],
+      "id": "2c3ca45d-9110-4c79-8f5b-197445bd45c7",
+      "name": "When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1ZEPGNrNXp8mOJ76HgGaUH8ZkNNb4wOPJt9uVI3tOoTw",
+          "mode": "list",
+          "cachedResultName": "Inventario_Bry",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZEPGNrNXp8mOJ76HgGaUH8ZkNNb4wOPJt9uVI3tOoTw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZEPGNrNXp8mOJ76HgGaUH8ZkNNb4wOPJt9uVI3tOoTw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "=={{ $json.body.items[0].producto }}",
+            "producto": "=={{ $json.body.items[0].producto }}",
+            "categoria": "=={{ $json.body.items[0].categoria.value ?? $json.body.items[0].categoria }}",
+            "cantidad": "=={{ Number($json.body.items[0].cantidad) }}",
+            "stock_minimo": "=={{ Number($json.body.items[0].stock_minimo) }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "producto",
+              "displayName": "producto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cantidad",
+              "displayName": "cantidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "stock_minimo",
+              "displayName": "stock_minimo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        256
+      ],
+      "id": "f1d592a0-9a9a-46c6-9910-7d2efe5ce2fa",
+      "name": "Actualizar_google_sheets",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "eWVxvWjEtWjv09nc",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst nuevas = $('Subworkflow Preparar Alerta').all()\n  .map((i) => i.json)\n  .filter((a) => a.estado === 'preparada');\n\n\nconst existentes = $input.all().flatMap((i) => i.json.results ?? []);\n\nconst clave = (nombre, nota) =>\n  String(nombre ?? '').trim().toLowerCase() + '|' + String(nota ?? '').trim();\n\nconst vistas = new Set(existentes.map((e) => clave(e.Nombre, e.Nota)));\n\nconst salida = [];\nfor (const alerta of nuevas) {\n  const k = clave(alerta.producto_normalizado, alerta.cuerpo);\n  if (vistas.has(k)) continue;\n  vistas.add(k);\n  salida.push({ json: alerta });\n}\nreturn salida;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1936,
+        368
+      ],
+      "id": "98f06de5-9df0-4497-9fe5-f5459afca561",
+      "name": "Validar duplicados",
+      "notes": "compara cada alerta nueva contra las alertas existentes en baserow "
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "maqdTqA7O6cP2sOG",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/maqdTqA7O6cP2sOG",
+          "cachedResultName": "Subworkflow - Preparar Alerta de Reposicion"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1264,
+        464
+      ],
+      "id": "f8418f39-7db4-4950-a187-0218de08bcd1",
+      "name": "Subworkflow Preparar Alerta",
+      "notes": "Llama al subworkflow una sola vez con todos los productos de stock bajo y espera su resultado."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c2000000-0000-4000-8000-0000000000a1",
+              "leftValue": "={{ $json.estado }}",
+              "rightValue": "preparada",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1488,
+        464
+      ],
+      "id": "4a995ef9-9c05-4095-94b7-fe5594f23626",
+      "name": "¿Alerta preparada?"
+    },
+    {
+      "parameters": {
+        "url": "https://api.baserow.io/api/database/rows/table/1227756/?user_field_names=true&size=200",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "baserowTokenApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1712,
+        368
+      ],
+      "id": "f68db472-df91-4952-8260-3d636ab4ac67",
+      "name": "Consultar alertas existentes",
+      "executeOnce": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1664,
+        672
+      ],
+      "id": "14ac0307-03d4-49d6-b6aa-fcd19498e50f",
+      "name": "Entrada invalida - revisar",
+      "notes": "Items rechazados por el subworkflow"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        1888,
+        672
+      ],
+      "id": "16cb767c-4c90-4c9b-b89d-a108262d2d6f",
+      "name": "When chat message received",
+      "webhookId": "25108e40-ca8e-4143-b12c-b230fae63012"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Eres un asistente inteligente de gestión de inventario. Tu trabajo es ayudar al usuario a consultar el estado de los productos, identificar artículos con stock bajo y dar recomendaciones de reposición.\nSiempre usa tu herramienta de Google Sheets para consultar los datos reales antes de responder. Responde en español, de forma clara, directa y estructurada."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2048,
+        720
+      ],
+      "id": "c2c2ab14-2a1f-49e8-b18a-821215692c32",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        1920,
+        928
+      ],
+      "id": "7f296686-17ad-414f-96fb-6ed4ae411250",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ObS1xBm8UIyoJi5T",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Consulta todos los productos, categorías y niveles de stock actuales del inventario",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1XZfQy7SHeDgEy5oxFKaMX02EWqoCyMFyJ5GmmKEYLEk/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XZfQy7SHeDgEy5oxFKaMX02EWqoCyMFyJ5GmmKEYLEk/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        2208,
+        928
+      ],
+      "id": "db0f9254-bad4-4edb-a744-3abb3eecc8e6",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "eWVxvWjEtWjv09nc",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2416,
+        736
+      ],
+      "id": "3a748ef9-5c9b-4c39-ac0b-98871e61904c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        2064,
+        928
+      ],
+      "id": "fa6513bd-395c-478e-a8ee-90cde6256cb2",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Tally": {
+      "main": [
+        [
+          {
+            "node": "Normalizar Datos de Tally",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar Datos de Tally": {
+      "main": [
+        [
+          {
+            "node": "Guardar Producto en Inventario",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar Producto en Inventario": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Stock Bajo2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger Diario2": {
+      "main": [
+        [
+          {
+            "node": "Actualizar_google_sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Stock Bajo2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Stock Bajo2": {
+      "main": [
+        [
+          {
+            "node": "Subworkflow Preparar Alerta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Inventario actualizarcion": {
+      "main": [
+        [
+          {
+            "node": "Actualizar_google_sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Actualizar_google_sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar_google_sheets": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar duplicados": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Subworkflow Preparar Alerta": {
+      "main": [
+        [
+          {
+            "node": "¿Alerta preparada?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Alerta preparada?": {
+      "main": [
+        [
+          {
+            "node": "Consultar alertas existentes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Entrada invalida - revisar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar alertas existentes": {
+      "main": [
+        [
+          {
+            "node": "Validar duplicados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "97d6b51f-b66f-4535-ab6b-04087a267de5",
+  "meta": {
+    "instanceId": "8cc12e454009ee6d2de6a1c81092b2b8f1c7ad0f8da861f607a4b70d2db6ef41"
+  },
+  "nodeGroups": [],
+  "id": "Vo0dfAsu9VhHQ53e",
+  "tags": []
+}
